@@ -1,6 +1,6 @@
 <template> 
   <div class="container">
-  	<h2>Aggregation Chart</h2>
+  	<h2>Aggregation Daily Chart</h2>
     <summary-chart></summary-chart>
   	
     <h2>Users</h2>

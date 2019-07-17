@@ -18,7 +18,15 @@ export default {
     }
   },
   mounted () {
+    if (this.chartdata == null) {
+      return
+    }
     this.renderChart(this.chartdata, this.options)
+  },
+  watch: {
+    chartdata() {
+        this.renderChart(this.chartdata, this.options)
+    }
   }
 }
 </script>
