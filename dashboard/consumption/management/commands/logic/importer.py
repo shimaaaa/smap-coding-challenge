@@ -1,8 +1,9 @@
 import abc
 import datetime
 from logging import getLogger
-from typing import List, Dict
+from typing import List, Dict, Optional
 
+from django.db import transaction
 from django.db.utils import IntegrityError
 from django.db.models import Avg, Sum
 from django.db.models.functions import Trunc
@@ -15,17 +16,37 @@ logger = getLogger(__name__)
 
 
 class DataImporter(metaclass=abc.ABCMeta):
+    """
+    Data import abstract class
+    """
 
     @abc.abstractmethod
     def user_bulk_import(self, users: List[UserDataDto]) -> None:
+        """
+        Bulk import user data
+            If data with the same user ID already exists, no user data will be registered.
+        :param users:
+        :return: None
+        """
         pass
 
     @abc.abstractmethod
     def consumption_bulk_import(self, consumptions: List[ConsumptionDataDto]) -> None:
+        """
+        Bulk import consumption data
+            If data with the same user ID and datetime already exists, no consumption data will be registered.
+        :param consumptions:
+        :return: None
+        """
         pass
 
     @abc.abstractmethod
     def summary_import(self, target_datetime_from) -> None:
+        """
+        Create aggregation daily consumption data
+        :param target_datetime_from: data aggregation start datetime
+        :return: None
+        """
         pass
 
 
@@ -50,6 +71,7 @@ class DatabaseImporter(DataImporter):
     @classmethod
     def _user_import(cls, user: Users):
         if Users.objects.filter(id=user.id).exists():
+            logger.warning('user data is already exits. (user_id: %s)', user.id)
             return
         user.save()
 
@@ -60,7 +82,8 @@ class DatabaseImporter(DataImporter):
             return
         consumption.save()
 
-    def _get_users_by_id(self, user_id_list) -> Dict[int, Users]:
+    @classmethod
+    def _get_users_by_id(cls, user_id_list) -> Dict[int, Users]:
         users_dict = dict()
         users = Users.objects.filter(id__in=user_id_list)
 
@@ -73,7 +96,8 @@ class DatabaseImporter(DataImporter):
         users = [self._convert_user_to_model(u) for u in dto_users]
 
         try:
-            Users.objects.bulk_create(users)
+            with transaction.atomic():
+                Users.objects.bulk_create(users)
         except IntegrityError:
             for user in users:
                 self._user_import(user)
@@ -87,17 +111,19 @@ class DatabaseImporter(DataImporter):
         for dto_consumption in dto_consumptions:
             user = users.get(dto_consumption.user_id)
             if user is None:
+                logger.warning('consumption data user dose not found. (user_id: %s)', dto_consumption.user_id)
                 continue
             consumption = self._convert_consumption_to_model(user=user, consumption=dto_consumption)
             consumptions.append(consumption)
 
         try:
-            UserConsumptions.objects.bulk_create(consumptions)
+            with transaction.atomic():
+                UserConsumptions.objects.bulk_create(consumptions)
         except IntegrityError:
             for consumption in consumptions:
                 self._consumption_import(consumption)
 
-    def summary_import(self, target_datetime_from: datetime.datetime):
+    def summary_import(self, target_datetime_from: Optional[datetime.datetime] = None):
         daily_data = UserConsumptions.objects\
                                      .annotate(target_date=Trunc('datetime', 'day')).values('target_date')\
                                      .annotate(total=Sum('consumption'))\

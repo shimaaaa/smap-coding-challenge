@@ -71,10 +71,11 @@ class DataFileReader(DataReader):
                     try:
                         user_id = int(user_id)
                         consumption_datetime = self._convert_to_datetime(row['datetime'])
+                        consumption_value = float(row['consumption'])
                         yield ConsumptionData(
                             user_id=user_id,
                             consumption_datetime=consumption_datetime,
-                            consumption=row['consumption']
+                            consumption=consumption_value
                         )
                     except Exception as e:
                         logger.warning(f'fail to import consumption data (file: {file_name}, line: {row_count}, cause: {e})')
