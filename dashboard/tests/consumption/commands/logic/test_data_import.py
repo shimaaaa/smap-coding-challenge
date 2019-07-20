@@ -61,7 +61,7 @@ class DataImportLogicTest(TestCase):
             data_reader=reader,
             data_importer=importer
         )
-        logic.execute()
+        logic.import_data()
 
         self.assertEqual(importer.user_import_counter, 1)
         self.assertEqual(importer.consumption_import_counter, 1)
@@ -75,7 +75,7 @@ class DataImportLogicTest(TestCase):
         )
         logic.USER_BULK_IMPORT_COUNT = 1
         logic.CONSUMPTION_BULK_IMPORT_COUNT = 2
-        logic.execute()
+        logic.import_data()
 
         self.assertEqual(importer.user_import_counter, 2)
         self.assertEqual(importer.consumption_import_counter, 2)

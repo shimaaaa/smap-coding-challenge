@@ -55,9 +55,12 @@ class DataImportLogic:
     def _import_summary_data(self, consumption_datetime_from):
         self._data_importer.summary_import(consumption_datetime_from)
 
-    def execute(self):
+    def import_data(self):
         logger.info('import user data')
         self._import_user_data()
         logger.info('import consumption data')
         consumption_datetime_from = self._import_consumption_data()
+        self.create_summary(consumption_datetime_from)
+
+    def create_summary(self, consumption_datetime_from: datetime):
         self._import_summary_data(consumption_datetime_from)
