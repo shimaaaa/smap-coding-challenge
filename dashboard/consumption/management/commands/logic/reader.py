@@ -74,8 +74,8 @@ class DataFileReader(DataReader):
                         consumption_value = float(row['consumption'])
                         yield ConsumptionData(
                             user_id=user_id,
-                            consumption_datetime=consumption_datetime,
-                            consumption=consumption_value
+                            target_datetime=consumption_datetime,
+                            value=consumption_value
                         )
                     except Exception as e:
                         logger.warning(f'fail to import consumption data (file: {file_name}, line: {row_count}, cause: {e})')

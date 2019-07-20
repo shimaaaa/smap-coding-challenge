@@ -27,20 +27,20 @@ class ConsumptionData:
 
     def __init__(self,
                  user_id: int,
-                 consumption_datetime: datetime.datetime,
-                 consumption: float):
+                 target_datetime: datetime.datetime,
+                 value: float):
         self._user_id = user_id
-        self._consumption_datetime = consumption_datetime
-        self._consumption = consumption
+        self._target_datetime = target_datetime
+        self._value = value
 
     @property
     def user_id(self):
         return self._user_id
 
     @property
-    def consumption_datetime(self):
-        return self._consumption_datetime
+    def target_datetime(self):
+        return self._target_datetime
 
     @property
-    def consumption(self):
-        return self._consumption
+    def value(self):
+        return self._value

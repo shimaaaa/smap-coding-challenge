@@ -36,8 +36,8 @@ export default {
     .then((res) => {
       
       const lebels = res.data.map(data => data.target_date)
-      const totalValues = res.data.map(data => data.total_consumption)
-      const averageValues = res.data.map(data => data.average_consumption)
+      const totalValues = res.data.map(data => data.total_value)
+      const averageValues = res.data.map(data => data.average_value)
       self.totalChartData = {
         labels: lebels,
         datasets: [

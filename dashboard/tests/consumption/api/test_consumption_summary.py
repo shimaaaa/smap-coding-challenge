@@ -6,7 +6,7 @@ import pytz
 from django.core.urlresolvers import reverse
 from rest_framework.test import APITestCase
 
-from consumption.models import UserConsumptions
+from consumption.models import UserConsumption
 from consumption.management.commands.logic.dto import UserData, ConsumptionData
 from consumption.management.commands.logic.importer import DatabaseImporter
 
@@ -38,19 +38,19 @@ class APIUserTest(APITestCase):
 
         self.assertEqual(len(summary_list), 2)
 
-        consumptions = UserConsumptions.objects.all()
+        consumptions = UserConsumption.objects.all()
         consumption_per_date = defaultdict(list)
-        for consumptions in consumptions:
-            consumption_per_date[consumptions.datetime.strftime('%Y-%m-%d')].append(consumptions.consumption)
+        for consumption in consumptions:
+            consumption_per_date[consumption.target_datetime.strftime('%Y-%m-%d')].append(consumption.value)
 
         summary = summary_list[0]
         consumption_summary_data = consumption_per_date['2016-07-14']
         self.assertEqual(summary['target_date'], '2016-07-14')
-        self.assertEqual(summary['total_consumption'], str(sum(consumption_summary_data)))
-        self.assertEqual(summary['average_consumption'], str(mean(consumption_summary_data)))
+        self.assertEqual(summary['total_value'], str(sum(consumption_summary_data)))
+        self.assertEqual(summary['average_value'], str(mean(consumption_summary_data)))
 
         summary = summary_list[1]
         consumption_summary_data = consumption_per_date['2016-07-15']
         self.assertEqual(summary['target_date'], '2016-07-15')
-        self.assertEqual(summary['total_consumption'], str(sum(consumption_summary_data)))
-        self.assertEqual(summary['average_consumption'], str(mean(consumption_summary_data)))
+        self.assertEqual(summary['total_value'], str(sum(consumption_summary_data)))
+        self.assertEqual(summary['average_value'], str(mean(consumption_summary_data)))

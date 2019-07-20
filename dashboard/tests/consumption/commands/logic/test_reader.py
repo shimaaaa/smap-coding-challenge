@@ -60,23 +60,23 @@ class DataFileReaderTest(TestCase):
 
         consumption = consumption_generator.__next__()
         self.assertEqual(consumption.user_id, 3000)
-        self.assertEqual(consumption.consumption, 39.0)
-        self.assertEqual(consumption.consumption_datetime, datetime(2016, 7, 15, 0, 0, 0, tzinfo=pytz.UTC))
+        self.assertEqual(consumption.value, 39.0)
+        self.assertEqual(consumption.target_datetime, datetime(2016, 7, 15, 0, 0, 0, tzinfo=pytz.UTC))
 
         consumption = consumption_generator.__next__()
         self.assertEqual(consumption.user_id, 3000)
-        self.assertEqual(consumption.consumption, 147.0)
-        self.assertEqual(consumption.consumption_datetime, datetime(2016, 7, 15, 0, 30, 0, tzinfo=pytz.UTC))
+        self.assertEqual(consumption.value, 147.0)
+        self.assertEqual(consumption.target_datetime, datetime(2016, 7, 15, 0, 30, 0, tzinfo=pytz.UTC))
 
         consumption = consumption_generator.__next__()
         self.assertEqual(consumption.user_id, 3001)
-        self.assertEqual(consumption.consumption, 378.0)
-        self.assertEqual(consumption.consumption_datetime, datetime(2016, 7, 15, 0, 0, 0, tzinfo=pytz.UTC))
+        self.assertEqual(consumption.value, 378.0)
+        self.assertEqual(consumption.target_datetime, datetime(2016, 7, 15, 0, 0, 0, tzinfo=pytz.UTC))
 
         consumption = consumption_generator.__next__()
         self.assertEqual(consumption.user_id, 3001)
-        self.assertEqual(consumption.consumption, 341.0)
-        self.assertEqual(consumption.consumption_datetime, datetime(2016, 7, 15, 0, 30, 1, tzinfo=pytz.UTC))
+        self.assertEqual(consumption.value, 341.0)
+        self.assertEqual(consumption.target_datetime, datetime(2016, 7, 15, 0, 30, 1, tzinfo=pytz.UTC))
 
         with self.assertRaises(StopIteration):
             consumption_generator.__next__()
@@ -87,18 +87,18 @@ class DataFileReaderTest(TestCase):
 
         consumption = consumption_generator.__next__()
         self.assertEqual(consumption.user_id, 3000)
-        self.assertEqual(consumption.consumption, 39.0)
-        self.assertEqual(consumption.consumption_datetime, datetime(2016, 7, 15, 0, 0, 0, tzinfo=pytz.UTC))
+        self.assertEqual(consumption.value, 39.0)
+        self.assertEqual(consumption.target_datetime, datetime(2016, 7, 15, 0, 0, 0, tzinfo=pytz.UTC))
 
         consumption = consumption_generator.__next__()
         self.assertEqual(consumption.user_id, 3000)
-        self.assertEqual(consumption.consumption, 147.0)
-        self.assertEqual(consumption.consumption_datetime, datetime(2016, 7, 15, 0, 30, 0, tzinfo=pytz.UTC))
+        self.assertEqual(consumption.value, 147.0)
+        self.assertEqual(consumption.target_datetime, datetime(2016, 7, 15, 0, 30, 0, tzinfo=pytz.UTC))
 
         consumption = consumption_generator.__next__()
         self.assertEqual(consumption.user_id, 3001)
-        self.assertEqual(consumption.consumption, 378.0)
-        self.assertEqual(consumption.consumption_datetime, datetime(2016, 7, 15, 0, 0, 0, tzinfo=pytz.UTC))
+        self.assertEqual(consumption.value, 378.0)
+        self.assertEqual(consumption.target_datetime, datetime(2016, 7, 15, 0, 0, 0, tzinfo=pytz.UTC))
 
         with self.assertRaises(StopIteration):
             consumption_generator.__next__()

@@ -10,7 +10,7 @@ from django.db.models.functions import Trunc
 
 from consumption.management.commands.logic.dto import UserData as UserDataDto
 from consumption.management.commands.logic.dto import ConsumptionData as ConsumptionDataDto
-from consumption.models import Users, UserConsumptions, ConsumptionDailySummary
+from consumption.models import User, UserConsumption, ConsumptionDailySummary
 
 logger = getLogger(__name__)
 
@@ -53,39 +53,40 @@ class DataImporter(metaclass=abc.ABCMeta):
 class DatabaseImporter(DataImporter):
 
     @classmethod
-    def _convert_user_to_model(cls, user: UserDataDto) -> Users:
-        return Users(
+    def _convert_user_to_model(cls, user: UserDataDto) -> User:
+        return User(
             id=user.user_id,
             area=user.area,
             tariff=user.tariff
         )
 
     @classmethod
-    def _convert_consumption_to_model(cls, user: Users, consumption: ConsumptionDataDto) -> UserConsumptions:
-        return UserConsumptions(
+    def _convert_consumption_to_model(cls, user: User, consumption: ConsumptionDataDto) -> UserConsumption:
+        return UserConsumption(
             user=user,
-            datetime=consumption.consumption_datetime,
-            consumption=consumption.consumption
+            target_datetime=consumption.target_datetime,
+            value=consumption.value
         )
 
     @classmethod
-    def _user_import(cls, user: Users):
-        if Users.objects.filter(id=user.id).exists():
+    def _user_import(cls, user: User):
+        if User.objects.filter(id=user.id).exists():
             logger.warning('user data is already exits. (user_id: %s)', user.id)
             return
         user.save()
 
     @classmethod
-    def _consumption_import(cls, consumption: UserConsumptions):
-        if UserConsumptions.objects.filter(user=consumption.user, datetime=consumption.datetime).exists():
-            logger.warning('consumption data is already exits. (user_id: %s, datetime: %s)', consumption.user.id, consumption.datetime)
+    def _consumption_import(cls, consumption: UserConsumption):
+        if UserConsumption.objects.filter(user=consumption.user, target_datetime=consumption.target_datetime).exists():
+            logger.warning('consumption data is already exits. (user_id: %s, datetime: %s)',
+                           consumption.user.id, consumption.target_datetime)
             return
         consumption.save()
 
     @classmethod
-    def _get_users_by_id(cls, user_id_list) -> Dict[int, Users]:
+    def _get_users_by_id(cls, user_id_list) -> Dict[int, User]:
         users_dict = dict()
-        users = Users.objects.filter(id__in=user_id_list)
+        users = User.objects.filter(id__in=user_id_list)
 
         for user in users:
             users_dict[user.id] = user
@@ -97,7 +98,7 @@ class DatabaseImporter(DataImporter):
 
         try:
             with transaction.atomic():
-                Users.objects.bulk_create(users)
+                User.objects.bulk_create(users)
         except IntegrityError:
             for user in users:
                 self._user_import(user)
@@ -118,25 +119,25 @@ class DatabaseImporter(DataImporter):
 
         try:
             with transaction.atomic():
-                UserConsumptions.objects.bulk_create(consumptions)
+                UserConsumption.objects.bulk_create(consumptions)
         except IntegrityError:
             for consumption in consumptions:
                 self._consumption_import(consumption)
 
     def summary_import(self, target_datetime_from: Optional[datetime.datetime] = None):
-        daily_data = UserConsumptions.objects\
-                                     .annotate(target_date=Trunc('datetime', 'day')).values('target_date')\
-                                     .annotate(total=Sum('consumption'))\
-                                     .annotate(avg=Avg('consumption'))
+        daily_data = UserConsumption.objects\
+                                    .annotate(target_date=Trunc('target_datetime', 'day')).values('target_date')\
+                                    .annotate(total=Sum('value'))\
+                                    .annotate(avg=Avg('value'))
         if target_datetime_from is not None:
             # set 00:00:00 to aggregate daily data
             target_datetime_from = target_datetime_from.replace(hour=0, minute=0, second=0)
-            daily_data = daily_data.filter(datetime__gte=target_datetime_from)
+            daily_data = daily_data.filter(target_datetime__gte=target_datetime_from)
 
         for d in daily_data:
             summary = ConsumptionDailySummary(
                 target_date=d['target_date'],
-                total_consumption=d['total'],
-                average_consumption=d['avg']
+                total_value=d['total'],
+                average_value=d['avg']
             )
             summary.save()

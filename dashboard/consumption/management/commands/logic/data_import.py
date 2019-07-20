@@ -1,5 +1,6 @@
 from logging import getLogger
 from typing import Optional
+from datetime import datetime
 
 from consumption.management.commands.logic.reader import DataReader
 from consumption.management.commands.logic.importer import DataImporter, DatabaseImporter
@@ -40,8 +41,8 @@ class DataImportLogic:
             count += 1
             consumptions.append(consumption)
 
-            if consumption_datetime_from is None or consumption_datetime_from > consumption.consumption_datetime:
-                consumption_datetime_from = consumption.consumption_datetime
+            if consumption_datetime_from is None or consumption_datetime_from > consumption.target_datetime:
+                consumption_datetime_from = consumption.target_datetime
 
             if count % self.CONSUMPTION_BULK_IMPORT_COUNT == 0:
                 self._data_importer.consumption_bulk_import(consumptions)
