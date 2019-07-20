@@ -92,5 +92,4 @@ ENV/
 node_modules
 
 # webpack
-main-*.js
-webpack-stats.json
+stats.json

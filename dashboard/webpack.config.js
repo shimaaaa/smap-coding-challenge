@@ -1,9 +1,9 @@
-const path = require("path");
-const webpack = require('webpack');
-const BundleTracker = require('webpack-bundle-tracker');
-const VueLoaderPlugin = require('vue-loader/lib/plugin');
+const path = require("path")
+const webpack = require('webpack')
+const BundleTracker = require('webpack-bundle-tracker')
+const VueLoaderPlugin = require('vue-loader/lib/plugin')
 
-
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 module.exports = {
     context: __dirname,
     entry: './consumption/assets/js/app.js',
@@ -12,10 +12,15 @@ module.exports = {
         filename: "[name]-[hash].js",
         path: path.resolve('./consumption/assets/bundles/'),
     },
-
+    externals: {
+        vue: "Vue",
+        moment: 'moment',
+        'chart.js': 'Chart'
+    },
     plugins: [
         new BundleTracker({filename: './webpack-stats.json'}),
         new VueLoaderPlugin(),
+        new CleanWebpackPlugin()
     ],
 
     module: {
